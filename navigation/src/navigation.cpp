@@ -7,6 +7,7 @@
  */
 
 #include <navigation/monitored_nav_wrapper.hpp>
+#include <navigation/topo_nav_wrapper.hpp>
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "navigation");
@@ -14,6 +15,7 @@ int main(int argc, char** argv) {
 
   ROS_INFO("Running Navigation");
   MonitoredNavWrapper monitored_nav_wrapper(&nh);
+  TopoNavWrapper topo_nav_wrapper(&nh);
 
   ros::Rate r(10);
 

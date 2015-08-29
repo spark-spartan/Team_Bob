@@ -147,7 +147,8 @@ include_directories(
 ## Declare a C++ executable
 add_executable(navigation
   src/navigation.cpp
-  src/monitored_nav_wrapper.cpp)
+  src/monitored_nav_wrapper.cpp
+  src/topo_nav_wrapper.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
