@@ -1,0 +1,2 @@
+# Distance at which the robot stops when approaching someone
+personal_space: 1.2

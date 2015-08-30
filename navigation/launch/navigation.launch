@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+
+<launch>
+          <rosparam file="$(find navigation)/cfg/navigation.yaml" command="load" />
+          <node name="navigation" pkg="navigation" type="navigation" output="screen" clear_params="true">
+          </node>
+</launch>
