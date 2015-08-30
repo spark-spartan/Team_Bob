@@ -35,8 +35,7 @@ class Speak:
         maryclient.wait_for_server()
         print 'mary_client response'
         line = getattr(self, req.speech_type)()
-        print line 
-        
+
         speak = mary_tts.msg.maryttsGoal()
         speak.text = line
         maryclient.send_goal_and_wait(speak)
@@ -58,32 +57,28 @@ class Speak:
             return line
 
     def fortune(self):
-        fortune_length = self.file_length('fortune.csv')
-        with open('fortune.csv') as f:
+        fortune_length = self.file_length('fortune.txt')
+        with open('fortune.txt') as f:
             line = list(f)[randint(0, fortune_length)]
-            line = self.regex.sub('', str(line))
         return line
 
     def joke(self):
-        joke_length = self.file_length('joke.csv')
-        with open('joke.csv') as f:
+        joke_length = self.file_length('jokes.txt')
+        with open('jokes.txt') as f:
             line = list(f)[randint(0, joke_length)]
-            line = self.regex.sub('', str(line))
         return line
 
     def greeting(self):
         print 'hello world'
-        greeting_length = self.file_length('greeting.csv')
-        with open('greeting.csv') as f:
+        greeting_length = self.file_length('greeting.txt')
+        with open('greeting.txt') as f:
             line = list(f)[randint(0, greeting_length)]
-            line = self.regex.sub('', str(line))
         return line
 
     def farewell(self):
-        farewell_length = self.file_length('farwell.csv')
-        with open('farwell.csv') as f:
+        farewell_length = self.file_length('farwell.txt')
+        with open('farwell.txt') as f:
             line = list(f)[randint(0, farewell_length)]
-            line = self.regex.sub('', str(line))
         return line
 
 if __name__ == '__main__':
