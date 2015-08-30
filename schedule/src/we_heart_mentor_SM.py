@@ -16,7 +16,6 @@ import smach
 import smach_ros
 
 from states import *
-from smach_ros import ServiceState
 
 def pop_waypoint(ls):
     # Rotating the waypoint list one step to the right
