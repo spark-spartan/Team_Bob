@@ -46,14 +46,14 @@ class MonitoredNavWrapper {
   bool startHumanApproach(
     navigation::StartHumanApproach::Request& req,
     navigation::StartHumanApproach::Response& res);
-  // void calcSafePose();
-  // void sendNavGoal(bool waypoint_nav);
 
  private:
   // Flags
 
   // Constants
   float personal_space_;
+  float approach_timeout_;
+  float node_nav_timeout_;
 
   // Variables
   std::string waypoint;

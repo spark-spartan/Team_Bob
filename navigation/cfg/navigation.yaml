@@ -1,2 +1,4 @@
 # Distance at which the robot stops when approaching someone
 personal_space: 1.2
+approach_timeout: 300
+node_nav_timeout: 300
