@@ -98,17 +98,22 @@ class Speak:
         self.talk(line)
     
     def card_command(self):
-        rospy.Subscriber('/socialCardReader/commands', String, self.card_callback)
+        print 'start sub'
+	rospy.Subscriber('/socialCardReader/commands', String, self.card_callback)
         
     def card_callback(self, msg):
-        if msg == 'PATROL':
+        print 'card found'
+        print msg.data
+	if msg.data == 'PATROL':
+	    print 'fortune'
             self.fortune()
             self.farewell()
-        elif msg == 'PAUSE_WALK':
-            self.joke()
+        elif msg.data == 'PAUSE_WALK':
+            print 'joke'
+	    self.joke()
             self.farewell()
-        
-        
+        print 'fin'
+       
 if __name__ == '__main__':
     try:
         Speak()
