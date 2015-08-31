@@ -7,6 +7,7 @@ project(schedule)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
+  navigation
 )
 
 ## System dependencies are found with CMake's conventions
