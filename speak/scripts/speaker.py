@@ -6,6 +6,7 @@ import mary_tts.srv
 import strands_gazing.msg
 import os
 import speak.srv
+import thread
 from random import randint
 
 
@@ -26,6 +27,12 @@ class Speak:
         gaze.send_goal(goal)
         print 'server hit'
         
+    def talk(self, line):
+        speak = mary_tts.msg.maryttsGoal()
+        speak.text = line
+        maryclient.send_goal_and_wait(speak)
+        maryclient.cancel_all_goals()
+        
     def change_voice(self):
         try:
             s = rospy.ServiceProxy('/ros_mary/set_voice', mary_tts.srv.SetVoice)
@@ -39,15 +46,16 @@ class Speak:
     def speak_cb(self, req):
         print 'request recieved'
 
-        maryclient = actionlib.SimpleActionClient('speak', mary_tts.msg.maryttsAction)
-        maryclient.wait_for_server()
+        self.maryclient = actionlib.SimpleActionClient('speak', mary_tts.msg.maryttsAction)
+        self.maryclient.wait_for_server()
         print 'mary_client response'
-        line = getattr(self, req.speech_type)()
-
-        speak = mary_tts.msg.maryttsGoal()
-        speak.text = line
-        maryclient.send_goal_and_wait(speak)
-        maryclient.cancel_all_goals()
+        
+        if req.speech_type == 'greeting':
+            thread.start_new_thread(self.greeting)
+            self.card_command()            
+        
+        else:
+            getattr(self, req.speech_type)()
 
     def __init__(self):
         os.chdir(os.path.dirname(os.path.realpath(__file__)))
@@ -67,27 +75,37 @@ class Speak:
         fortune_length = self.file_length('fortune.txt')
         with open('fortune.txt') as f:
             line = list(f)[randint(0, fortune_length)]
-        return line
+        self.talk(line)
 
     def joke(self):
         joke_length = self.file_length('jokes.txt')
         with open('jokes.txt') as f:
             line = list(f)[randint(0, joke_length)]
-        return line
+        self.talk(line)
 
     def greeting(self):
-        print 'hello world'
         greeting_length = self.file_length('greeting.txt')
         with open('greeting.txt') as f:
             line = list(f)[randint(0, greeting_length)]
-        return line
+        self.talk(line)
 
     def farewell(self):
         farewell_length = self.file_length('farwell.txt')
         with open('farwell.txt') as f:
             line = list(f)[randint(0, farewell_length)]
-        return line
-
+        self.talk(line)
+    
+    def card_command(self):
+        rospy.Subscriber('/socialCardReader/commands', string, self.card_callback())
+        
+    def card_callback(self):
+        if msg.data == 'PATROL':
+            self.fortune()
+        else if msg.data == 'PAUSE_WALK':
+            self.joke()
+            
+        self.farewell()
+        
 if __name__ == '__main__':
     try:
         Speak()
