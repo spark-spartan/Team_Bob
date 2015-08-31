@@ -12,21 +12,20 @@ from random import randint
 class Speak:
 
     def speak_server(self):
-	rospy.init_node('bob_speak_server', anonymous=True)
-        gaze = actionlib.SimpleActionClient('gaze_at_pose', strands_gazing.msg.GazeAtPoseAction)
-        gaze.wait_for_server()
-	print 'hitting gaze server'
-        goal = strands_gazing.msg.GazeAtPoseGoal()
-        goal.topic_name = '/upper_body_detector/closest_bounding_box_centre'
-        goal.runtime_sec = 0
-
-        gaze.send_goal(goal)
-	
-        print 'server hit'
-	rospy.spin()
+        rospy.init_node('bob_speak_server', anonymous=True)
         rospy.Service('bob_speak', speak.srv.BobSpeak, self.speak_cb)
         print 'service started'
 
+    def track_human():
+        gaze = actionlib.SimpleActionClient('gaze_at_pose', strands_gazing.msg.GazeAtPoseAction)
+        gaze.wait_for_server()
+        print 'hitting gaze server
+        goal = strands_gazing.msg.GazeAtPoseGoal()
+        goal.topic_name = '/upper_body_detector/closest_bounding_box_centre'
+        goal.runtime_sec = 0
+        gaze.send_goal(goal)
+        print 'server hit'
+        
     def change_voice(self):
         try:
             s = rospy.ServiceProxy('/ros_mary/set_voice', mary_tts.srv.SetVoice)
@@ -48,7 +47,6 @@ class Speak:
         speak = mary_tts.msg.maryttsGoal()
         speak.text = line
         maryclient.send_goal_and_wait(speak)
-        rospy.sleep(2.)
         maryclient.cancel_all_goals()
 
     def __init__(self):
