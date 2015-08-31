@@ -20,6 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
   nav_msgs
   roscpp
   actionlib
+  topological_navigation
   std_msgs
   actionlib_msgs
   strands_navigation_msgs

@@ -22,6 +22,9 @@
 #include <strands_navigation_msgs/MonitoredNavigationActionGoal.h>
 #include <strands_navigation_msgs/MonitoredNavigationActionFeedback.h>
 
+#include <topological_navigation/GotoNodeAction.h>
+#include <topological_navigation/GotoNodeGoal.h>
+
 // typedef actionlib::SimpleActionClient<strands_navigation_msgs::MonitoredNavigationAction>
 // Client;
 
@@ -44,7 +47,7 @@ class MonitoredNavWrapper {
     navigation::StartHumanApproach::Request& req,
     navigation::StartHumanApproach::Response& res);
   // void calcSafePose();
-  void sendNavGoal(bool waypoint_nav);
+  // void sendNavGoal(bool waypoint_nav);
 
  private:
   // Flags
@@ -63,6 +66,8 @@ class MonitoredNavWrapper {
   ros::ServiceServer start_human_approach_;
   ros::Subscriber person_pose_sub_;
   ros::Subscriber monitored_feedback_sub_;
+  actionlib::SimpleActionClient<topological_navigation::GotoNodeAction>
+  topological_nav_ac;
   actionlib::SimpleActionClient<strands_navigation_msgs::MonitoredNavigationAction>
   monitored_nav_ac;
 
