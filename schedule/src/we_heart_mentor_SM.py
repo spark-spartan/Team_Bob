@@ -11,41 +11,45 @@ Usage:
     $> ./we_heart_mentor_SM.py
 """
 
-import rospy
+import rospy 
 import smach
-import smach_ros
+import smach_ros 
+#import sys
+#sys.path.append("../../navigation")
 
-from states import *
+#from states import *
+from collections import deque
+from navigation.srv import NavigateToWaypoint, NavigateToWaypointRequest
 
 def pop_waypoint(ls):
     # Rotating the waypoint list one step to the right
-    ls.appendleft(ls.pop())
+    ls.rotate(1)
+    print 'Getting waypoint from list!'
     return ls[1]
 
 def main():
     rospy.init_node('smach_example_state_machine')
     
-    # List of waypoints TODO: re-order them
-    wpls = ['WayPoint1', 'WayPoint2', 'WayPoint3', 'WayPoint4', 'WayPoint5', 'WayPoint6',
+    # List of waypoints TODO: re-order them    
+    wpls = deque(['WayPoint1', 'WayPoint2', 'WayPoint3', 'WayPoint4', 'WayPoint5', 'WayPoint6',
             'WayPoint7', 'WayPoint8', 'WayPoint9', 'WayPoint10', 'WayPoint11', 'WayPoint12',
             'WayPoint13', 'WayPoint14', 'WayPoint15', 'WayPoint16', 'WayPoint17', 'WayPoint18',
-            'WayPoint19']
+            'WayPoint19'])
             
     # Create a SMACH state machine
-    sm = smach.StateMachine(outcomes=['succeeded','aborted'])
+    sm = smach.StateMachine(outcomes=['succeeded','aborted','preempted'])
 
     # Open the container
     with sm:
         # Add states to the container
-        
-        smach.StateMachine.add('NAV_TO_WP', 
-                                ServiceState('navigation/navigate_to_waypoint',
-                                NavigateToWaypoint,
-                                request_cb = navigate_request,
-                                result_cb = navigate_result,
-                                input_keys = [pop_waypoint(wpls)]),
-                                transitions={'succeeded':'DETECT_PERSON'})
 
+        smach.StateMachine.add('NAV_TO_WP',
+                           smach_ros.ServiceState('navigation/navigate_to_waypoint',
+                                        NavigateToWaypoint,
+                                        request = NavigateToWaypointRequest(waypoint = pop_waypoint(wpls))),
+                           transitions={'succeeded':'NAV_TO_WP'})
+        
+  
                            
         #smach.StateMachine.add('FOO', ExampleState(), {'done':'BAR'})
         #smach.StateMachine.add('BAR', ExampleState(), {'done':'BAZ'})
