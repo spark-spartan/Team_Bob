@@ -14,6 +14,7 @@
 #include <actionlib/client/simple_action_client.h>
 
 #include <navigation/StartHumanApproach.h>
+#include <navigation/NavigateToWaypoint.h>
 
 #include <geometry_msgs/PoseStamped.h>
 
@@ -36,11 +37,14 @@ class MonitoredNavWrapper {
   void personPoseCB(const geometry_msgs::PoseStamped::ConstPtr& msg);
   void feedbackCB(const strands_navigation_msgs::
                   MonitoredNavigationActionFeedback::ConstPtr& msg);
+  bool navigateToWaypoint(
+    navigation::NavigateToWaypoint::Request& req,
+    navigation::NavigateToWaypoint::Response& res);
   bool startHumanApproach(
     navigation::StartHumanApproach::Request& req,
     navigation::StartHumanApproach::Response& res);
   // void calcSafePose();
-  void sendNavGoal();
+  void sendNavGoal(bool waypoint_nav);
 
  private:
   // Flags
@@ -49,11 +53,13 @@ class MonitoredNavWrapper {
   float personal_space_;
 
   // Variables
+  std::string waypoint;
   geometry_msgs::PoseStamped person_pose_;
   geometry_msgs::PoseStamped safe_pose_;
 
   // ROS
   ros::NodeHandle* nh_;
+  ros::ServiceServer navigate_to_waypoint_;
   ros::ServiceServer start_human_approach_;
   ros::Subscriber person_pose_sub_;
   ros::Subscriber monitored_feedback_sub_;

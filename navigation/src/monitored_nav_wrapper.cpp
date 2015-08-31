@@ -31,6 +31,9 @@ void MonitoredNavWrapper::rosSetup() {
                                     &MonitoredNavWrapper::personPoseCB, this);
   monitored_feedback_sub_ = nh_->subscribe("/monitored_navigation/feedback", 1,
                                            &MonitoredNavWrapper::feedbackCB, this);
+  navigate_to_waypoint_ =
+    nh_->advertiseService("navigate_to_waypoint",
+                          &MonitoredNavWrapper::navigateToWaypoint, this);
   start_human_approach_ =
     nh_->advertiseService("start_human_approach",
                           &MonitoredNavWrapper::startHumanApproach, this);
@@ -51,18 +54,32 @@ void MonitoredNavWrapper::feedbackCB(const
   // person_pose_ = *msg;
 }
 
-bool MonitoredNavWrapper::startHumanApproach(
-  navigation::StartHumanApproach::Request& req,
-  navigation::StartHumanApproach::Response& res) {
-  res.ok = true;
+bool MonitoredNavWrapper::navigateToWaypoint(
+  navigation::NavigateToWaypoint::Request& req,
+  navigation::NavigateToWaypoint::Response& res) {
   // person_pose_ = req.person_pose;
-  this->sendNavGoal();
+  waypoint = req.waypoint;
+  this->sendNavGoal(true);
+  res.res = true;
   return true;
 }
 
-void MonitoredNavWrapper::sendNavGoal() {
+bool MonitoredNavWrapper::startHumanApproach(
+  navigation::StartHumanApproach::Request& req,
+  navigation::StartHumanApproach::Response& res) {
+  // person_pose_ = req.person_pose;
+  this->sendNavGoal(false);
+  res.res = true;
+  return true;
+}
+
+void MonitoredNavWrapper::sendNavGoal(bool waypoint_nav) {
   strands_navigation_msgs::MonitoredNavigationGoal goal;
-  goal.action_server = "monitored_navigation";
-  goal.target_pose = person_pose_;
+  if (waypoint_nav) {
+    goal.action_server = waypoint;
+  } else {
+    goal.action_server = "move_base";
+    goal.target_pose = person_pose_;
+  }
   monitored_nav_ac.sendGoal(goal);
 }
