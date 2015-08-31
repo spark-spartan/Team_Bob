@@ -103,10 +103,11 @@ class Speak:
     def card_callback(self, msg):
         if msg == 'PATROL':
             self.fortune()
+            self.farewell()
         elif msg == 'PAUSE_WALK':
             self.joke()
-            
-        self.farewell()
+            self.farewell()
+        
         
 if __name__ == '__main__':
     try:
