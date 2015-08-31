@@ -21,11 +21,14 @@ import smach_ros
 from collections import deque
 from navigation.srv import NavigateToWaypoint, NavigateToWaypointRequest
 
+counter = 0
+
 def pop_waypoint(ls):
     # Rotating the waypoint list one step to the right
-    ls.rotate(1)
+    global counter += 1
+    counter = counter%len(ls)
     print 'Getting waypoint from list!'
-    return ls[1]
+    return ls(counter)
 
 def main():
     rospy.init_node('smach_example_state_machine')
@@ -48,8 +51,15 @@ def main():
                                         NavigateToWaypoint,
                                         request = NavigateToWaypointRequest(waypoint = pop_waypoint(wpls))),
                            transitions={'succeeded':'NAV_TO_WP'})
+                           
+        #smach.StateMachine.add('DETECT_PERSON', smach_ros.MonitorState("/people_tracker/pose", Empty, monitor_cb),
+                           #transitions={'invalid':'DETECT_PERSON', 'valid':'APROACH_PERSON', 'preempted':'DETECT_PERSON'})
         
-  
+        #smach.StateMachine.add('APROACH_PERSON',
+                           #smach_ros.ServiceState('navigation/navigate_to_waypoint',
+                                        #NavigateToWaypoint,
+                                        #request = NavigateToWaypointRequest(waypoint = pop_waypoint(wpls))),
+                           #transitions={'succeeded':'NAV_TO_WP'})
                            
         #smach.StateMachine.add('FOO', ExampleState(), {'done':'BAR'})
         #smach.StateMachine.add('BAR', ExampleState(), {'done':'BAZ'})
