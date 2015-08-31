@@ -18,26 +18,26 @@ import smach_ros
 #sys.path.append("../../navigation")
 
 #from states import *
-from collections import deque
 from navigation.srv import NavigateToWaypoint, NavigateToWaypointRequest
 
 counter = 0
 
 def pop_waypoint(ls):
     # Rotating the waypoint list one step to the right
-    global counter += 1
+    global counter
+    counter += 1
     counter = counter%len(ls)
     print 'Getting waypoint from list!'
-    return ls(counter)
+    return ls[counter]
 
 def main():
     rospy.init_node('smach_example_state_machine')
     
     # List of waypoints TODO: re-order them    
-    wpls = deque(['WayPoint1', 'WayPoint2', 'WayPoint3', 'WayPoint4', 'WayPoint5', 'WayPoint6',
+    wpls = ['WayPoint1', 'WayPoint2', 'WayPoint3', 'WayPoint4', 'WayPoint5', 'WayPoint6',
             'WayPoint7', 'WayPoint8', 'WayPoint9', 'WayPoint10', 'WayPoint11', 'WayPoint12',
             'WayPoint13', 'WayPoint14', 'WayPoint15', 'WayPoint16', 'WayPoint17', 'WayPoint18',
-            'WayPoint19'])
+            'WayPoint19']
             
     # Create a SMACH state machine
     sm = smach.StateMachine(outcomes=['succeeded','aborted','preempted'])
