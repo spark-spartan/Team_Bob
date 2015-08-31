@@ -12,18 +12,18 @@ from random import randint
 class Speak:
 
     def speak_server(self):
-        rospy.init_node('bob_speak_server', anonymous=True)
+	rospy.init_node('bob_speak_server', anonymous=True)
         gaze = actionlib.SimpleActionClient('gaze_at_pose', strands_gazing.msg.GazeAtPoseAction)
-        print 'hitting gaze server'
+        gaze.wait_for_server()
+	print 'hitting gaze server'
         goal = strands_gazing.msg.GazeAtPoseGoal()
         goal.topic_name = '/upper_body_detector/closest_bounding_box_centre'
         goal.runtime_sec = 0
 
         gaze.send_goal(goal)
-        gaze.wait_for_result()
-        print gaze.get_result()
+	
         print 'server hit'
-
+	rospy.spin()
         rospy.Service('bob_speak', speak.srv.BobSpeak, self.speak_cb)
         print 'service started'
 
