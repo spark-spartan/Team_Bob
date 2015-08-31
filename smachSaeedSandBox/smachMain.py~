@@ -1,0 +1,132 @@
+#!/usr/bin/env python
+
+import rospy
+import smach
+import smach_ros
+import time 
+
+from navigation import navFun
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~ Global Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+waypoints = ['wp1','wp2','wp3','wp4','wp5','wp6',
+             'wp7','wp8','wp9','wp10','wp11','wp12']
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Classes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+# define state Foo
+class ChangeDestination(smach.State):
+    def __init__(self):
+        smach.State.__init__(self, 
+                             outcomes=['success'],
+                             input_keys=['wayPointIdx_in'],
+                             output_keys=['wayPointIdx_out'])
+
+    def execute(self, userdata):
+        rospy.loginfo('Executing state ChangeDestination')
+        userdata.wayPointIdx_out = userdata.wayPointIdx_in + 1
+        return 'success'
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+class Navigation(smach.State):
+    def __init__(self):
+        smach.State.__init__(self, 
+                             outcomes=['success','failure'],
+                             input_keys=['wayPointIdx'])
+        
+    def execute(self, userdata):
+        rospy.loginfo('Executing state Navigation')
+        rospy.loginfo('Counter = %f'%userdata.wayPointIdx)
+        time.sleep(2)
+        return 'success'
+        # if True:
+        #     return 'success'
+        # else:
+        #     return 'failure'
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+# class DetectPerson (smach.State):
+#     def __init__(self, outcomes=['success', 'failure']):
+#         smach.State.__init__(self, outcomes=['success', 'failure'])
+#     def execute(self, userdata=None):
+#         rospy.loginfo('SMACH executing state \'Detection\'')
+#         time.sleep(2)
+#         if True:
+#             return 'success'
+#         else:
+#             return 'failure'
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+# class ApproachPerson (smach.State):
+#     def __init__(self, outcomes=['success', 'failure']):
+#         smach.State.__init__(self, outcomes=['success', 'failure'])
+#     def execute(self, userdata=None):
+#         rospy.loginfo('SMACH executing state \'Approach\'')
+#         if True:
+#             return 'success'
+#         else:
+#             return 'failure'
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+# class Interact (smach.State):
+#     def __init__(self, outcomes=['success', 'failure']):
+#         smach.State.__init__(self, outcomes=['success', 'failure'])        
+#     def execute(self, userdata=None):
+#         rospy.loginfo('SMACH executing state \'Interact\'')
+#         if True:
+#             return 'success'
+#         else:
+#             return 'failure'
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+def main():
+    rospy.init_node('smachSaeedSandBox')
+
+    # Create a SMACH state machine
+    sm = smach.StateMachine(outcomes=['success'])
+    sm.userdata.smWayPointIdx = 0
+
+    # Open the container
+    with sm:
+        # Add states to the container
+        smach.StateMachine.add('ChangeDestination', ChangeDestination(), 
+                               transitions={'success':'Navigation'},
+                               remapping={'wayPointIdx_in':'smWayPointIdx', 
+                                          'wayPointIdx_out':'smWayPointIdx'})
+        smach.StateMachine.add('Navigation', Navigation(), 
+                               transitions={'success':'ChangeDestination',
+                                            'failure':'ChangeDestination'},
+                               remapping={'wayPointIdx':'smWayPointIdx'})
+
+        # smach.StateMachine.add('DetectPerson', DetectPerson(), 
+        #                        transitions={'success':'ChangeDestination',
+        #                                     'failure':'ChangeDestination'})
+
+        # smach.StateMachine.add('ApproachPerson', ApproachPerson(),  
+        #                        transitions={'success':'Interact',
+        #                                     'failure':' '})
+
+        # smach.StateMachine.add('Interact', Interact(),   
+        #                        transitions={'success':' ',
+        #                                     'failure':' '})
+
+    # Execute SMACH plan
+    outcome = sm.execute()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+
+if __name__ == '__main__':
+    main()
