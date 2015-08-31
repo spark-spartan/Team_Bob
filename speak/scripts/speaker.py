@@ -74,7 +74,7 @@ class Speak:
             return line
 
     def fortune(self):
-        fortune_length = self.file_length('fortune.txt')
+        fortune_length = self.file_length('fortunes.txt')
         with open('fortune.txt') as f:
             line = list(f)[randint(0, fortune_length)]
         self.talk(line)
