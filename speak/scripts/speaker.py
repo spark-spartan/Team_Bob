@@ -7,6 +7,7 @@ import strands_gazing.msg
 import os
 import speak.srv
 import thread
+from std_msgs.msg import String
 from random import randint
 
 
@@ -16,11 +17,12 @@ class Speak:
         rospy.init_node('bob_speak_server', anonymous=True)
         rospy.Service('bob_speak', speak.srv.BobSpeak, self.speak_cb)
         print 'service started'
+	rospy.spin()	
 
     def track_human():
         gaze = actionlib.SimpleActionClient('gaze_at_pose', strands_gazing.msg.GazeAtPoseAction)
         gaze.wait_for_server()
-        print 'hitting gaze server
+        print 'hitting gaze server'
         goal = strands_gazing.msg.GazeAtPoseGoal()
         goal.topic_name = '/upper_body_detector/closest_bounding_box_centre'
         goal.runtime_sec = 0
@@ -30,8 +32,8 @@ class Speak:
     def talk(self, line):
         speak = mary_tts.msg.maryttsGoal()
         speak.text = line
-        maryclient.send_goal_and_wait(speak)
-        maryclient.cancel_all_goals()
+        self.maryclient.send_goal_and_wait(speak)
+        self.maryclient.cancel_all_goals()
         
     def change_voice(self):
         try:
@@ -51,7 +53,7 @@ class Speak:
         print 'mary_client response'
         
         if req.speech_type == 'greeting':
-            thread.start_new_thread(self.greeting)
+            thread.start_new_thread(self.greeting, ())
             self.card_command()            
         
         else:
@@ -90,18 +92,18 @@ class Speak:
         self.talk(line)
 
     def farewell(self):
-        farewell_length = self.file_length('farwell.txt')
-        with open('farwell.txt') as f:
+        farewell_length = self.file_length('farewell.txt')
+        with open('farewell.txt') as f:
             line = list(f)[randint(0, farewell_length)]
         self.talk(line)
     
     def card_command(self):
-        rospy.Subscriber('/socialCardReader/commands', string, self.card_callback())
+        rospy.Subscriber('/socialCardReader/commands', String, self.card_callback)
         
-    def card_callback(self):
-        if msg.data == 'PATROL':
+    def card_callback(self, msg):
+        if msg == 'PATROL':
             self.fortune()
-        else if msg.data == 'PAUSE_WALK':
+        elif msg == 'PAUSE_WALK':
             self.joke()
             
         self.farewell()
