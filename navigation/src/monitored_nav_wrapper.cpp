@@ -21,6 +21,8 @@ MonitoredNavWrapper::~MonitoredNavWrapper() {
 
 void MonitoredNavWrapper::loadParams() {
   ros::param::param("personal_space", personal_space_, 1.2f);
+  ros::param::param("approach_timeout", approach_timeout_, 5.0f);
+  ros::param::param("node_nav_timeout", node_nav_timeout_, 5.0f);
   ros::param::set("/move_base/DWAPlannerROS/xy_goal_tolerance", personal_space_);
 }
 
@@ -63,7 +65,18 @@ bool MonitoredNavWrapper::navigateToWaypoint(
   goal.target = req.waypoint;
 
   topological_nav_ac.sendGoal(goal);
-  res.res = true;
+
+  bool finished_before_timeout =
+    topological_nav_ac.waitForResult(ros::Duration(node_nav_timeout_));
+
+  if (finished_before_timeout) {
+    actionlib::SimpleClientGoalState state = topological_nav_ac.getState();
+    ROS_INFO("Action finished: %s", state.toString().c_str());
+    res.res = true;
+  } else {
+    ROS_INFO("Action did not finish before the time out.");
+    res.res = false;
+  }
 
   return true;
 }
@@ -79,16 +92,17 @@ bool MonitoredNavWrapper::startHumanApproach(
 
   monitored_nav_ac.sendGoal(goal);
 
-  res.res = true;
+  bool finished_before_timeout =
+    monitored_nav_ac.waitForResult(ros::Duration(approach_timeout_));
+
+  if (finished_before_timeout) {
+    actionlib::SimpleClientGoalState state = monitored_nav_ac.getState();
+    ROS_INFO("Action finished: %s", state.toString().c_str());
+    res.res = true;
+  } else {
+    ROS_INFO("Action did not finish before the time out.");
+    res.res = false;
+  }
+
   return true;
 }
-
-// void MonitoredNavWrapper::sendNavGoal(bool waypoint_nav) {
-//   if (waypoint_nav) {
-//     goal.action_server = waypoint;
-//   } else {
-//     goal.action_server = "move_base";
-//     goal.target_pose = person_pose_;
-//   }
-//   monitored_nav_ac.sendGoal(goal);
-// }
