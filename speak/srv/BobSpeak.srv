@@ -2,3 +2,4 @@
 string speech_type
 ---
 #response
+int64 state
