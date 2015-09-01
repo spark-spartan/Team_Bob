@@ -40,6 +40,9 @@ void MonitoredNavWrapper::rosSetup() {
   start_human_approach_ =
     nh_->advertiseService("start_human_approach",
                           &MonitoredNavWrapper::startHumanApproach, this);
+  ROS_INFO("Waiting for Topological Nav Action Server...");
+  topological_nav_ac.waitForServer();
+  ROS_INFO("Topological Nav Action Server ready!");
   ROS_INFO("Waiting for Monitored Nav Action Server...");
   monitored_nav_ac.waitForServer();
   ROS_INFO("Monitored Nav Action Server ready!");
