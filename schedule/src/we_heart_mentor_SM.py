@@ -14,7 +14,8 @@ Usage:
 import rospy
 import smach
 import smach_ros
-import detect
+from bayes_people_tracker.msg import PeopleTracker
+
 #import sys
 #sys.path.append("../../navigation")
 
@@ -22,16 +23,22 @@ import detect
 from navigation.srv import NavigateToWaypoint, NavigateToWaypointRequest
 from speak.srv import BobSpeak, BobSpeakRequest
 
-class DetectHuman(smach.state):
-    def __init__(self):
-        smach.State.__init__(self,
-                             outcomes=['success', 'failure']) 
-    def execute(self, userdata):
-        rospy.loginfo('SMACH executing state \'Detect\'')
-        return detect()
+#class DetectHuman(smach.state):
+#    def __init__(self):
+#        smach.State.__init__(self,
+#                             outcomes=['success', 'failure']) 
+#    def execute(self, userdata):
+#        rospy.loginfo('SMACH executing state \'Detect\'')
+#        return detect()
         
 counter = 0
 
+
+def monitor_cb(people):
+    if people.min_distance < 3 and people.min_distance > 0 and people.min_distance_angle > -np.pi / 4 and people.min_distance_angle < np.pi / 4:
+        return 'success'
+    else:
+        return 'failure'    
 
 def pop_waypoint(ls):
     # Rotating the waypoint list one step to the right
@@ -74,8 +81,8 @@ def main():
                                transitions={'succeeded':'BOB_SPEAK',
                                            'failure':'NAV_TO_WP'})
         
-        smach.StateMachine.add('DETECT_PERSON', smach_ros.MonitorState("/people_tracker/pose", Empty, monitor_cb),
-                           transitions={'invalid':'DETECT_PERSON', 'valid':'BOB_SPEAK', 'preempted':'DETECT_PERSON'})
+        smach.StateMachine.add('DETECT_PERSON', smach_ros.MonitorState("/people_tracker/people", PeopleTracker, monitor_cb),
+                           transitions={'success':'failure', 'success':'BOB_SPEAK'})
 
         #smach.StateMachine.add('APROACH_PERSON',
                            #smach_ros.ServiceState('navigation/navigate_to_waypoint',

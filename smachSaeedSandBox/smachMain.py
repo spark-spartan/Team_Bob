@@ -124,6 +124,7 @@ def main():
                                transitions={'success':'ChangeDestination',
                                             'failure':'ChangeDestination'},
                                remapping={'wayPointIdx':'smWayPointIdx'})
+        smach.StateMachine.add('DETECT', smach_ros.MonitorState())
 
     # Execute SMACH plan
     outcome = sm.execute()
