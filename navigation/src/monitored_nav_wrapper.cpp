@@ -72,13 +72,11 @@ bool MonitoredNavWrapper::navigateToWaypoint(
   if (finished_before_timeout) {
     actionlib::SimpleClientGoalState state = topological_nav_ac.getState();
     ROS_INFO("Action finished: %s", state.toString().c_str());
-    res.res = true;
+    return true;
   } else {
     ROS_INFO("Action did not finish before the time out.");
-    res.res = false;
+    return false;
   }
-
-  return true;
 }
 
 bool MonitoredNavWrapper::startHumanApproach(
@@ -98,11 +96,9 @@ bool MonitoredNavWrapper::startHumanApproach(
   if (finished_before_timeout) {
     actionlib::SimpleClientGoalState state = monitored_nav_ac.getState();
     ROS_INFO("Action finished: %s", state.toString().c_str());
-    res.res = true;
+    return true;
   } else {
     ROS_INFO("Action did not finish before the time out.");
-    res.res = false;
+    return false;
   }
-
-  return true;
 }
