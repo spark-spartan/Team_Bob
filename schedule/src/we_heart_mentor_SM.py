@@ -14,6 +14,7 @@ Usage:
 import rospy
 import smach
 import smach_ros
+import detect
 #import sys
 #sys.path.append("../../navigation")
 
@@ -21,11 +22,11 @@ import smach_ros
 from navigation.srv import NavigateToWaypoint, NavigateToWaypointRequest
 from speak.srv import BobSpeak, BobSpeakRequest
 
-class DetectHuman():
-    def __init__():
+class DetectHuman:
+    def __init__(self):
         smach.State.__init__(self,
-                             outcomes=['success', 'failure'],
-                             input_keys=['wayPointIdx'])
+                             outcomes=['success', 'failure'])
+                             
     def execute(self, userdata):
         rospy.loginfo('SMACH executing state \'Detect\'')
         return detect()
@@ -65,13 +66,13 @@ def main():
                                transitions={'succeeded':'NAV_TO_WP'})
 
         smach.StateMachine.add('BOB_SPEAK',
-                               smach_ros.ServiceState('speak/bob_speak'),
+                               smach_ros.ServiceState('speak/bob_speak',
                                BobSpeak,
-                               request = BobSpeakRequest(speech_type = 'greeting')))
+                               request = BobSpeakRequest(speech_type = 'greeting')),
                                transitions={'succeeded':'NAV_TO_WP'})
         smach.StateMachine.add('DETECT_HUMAN',
-                               DetectHuman(),
-                               transitions={'succeeded':'BOB_SPEAK'
+                               DetectHuman,
+                               transitions={'succeeded':'BOB_SPEAK',
                                            'failure':'NAV_TO_WP'})
         
         #smach.StateMachine.add('DETECT_PERSON', smach_ros.MonitorState("/people_tracker/pose", Empty, monitor_cb),
@@ -103,3 +104,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
