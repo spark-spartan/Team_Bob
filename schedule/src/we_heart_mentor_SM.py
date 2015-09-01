@@ -22,11 +22,10 @@ import detect
 from navigation.srv import NavigateToWaypoint, NavigateToWaypointRequest
 from speak.srv import BobSpeak, BobSpeakRequest
 
-class DetectHuman:
+class DetectHuman(smach.state):
     def __init__(self):
         smach.State.__init__(self,
-                             outcomes=['success', 'failure'])
-                             
+                             outcomes=['success', 'failure']) 
     def execute(self, userdata):
         rospy.loginfo('SMACH executing state \'Detect\'')
         return detect()
@@ -65,18 +64,18 @@ def main():
                                request = NavigateToWaypointRequest(waypoint = pop_waypoint(wpls))),
                                transitions={'succeeded':'NAV_TO_WP'})
 
-        smach.StateMachine.add('BOB_SPEAK',
-                               smach_ros.ServiceState('speak/bob_speak',
-                               BobSpeak,
-                               request = BobSpeakRequest(speech_type = 'greeting')),
-                               transitions={'succeeded':'NAV_TO_WP'})
+       # smach.StateMachine.add('BOB_SPEAK',
+       #                        smach_ros.ServiceState('speak/bob_speak',
+       #                        BobSpeak,
+       #                        request = BobSpeakRequest(speech_type = 'greeting')),
+       #                        transitions={'succeeded':'NAV_TO_WP'})
         smach.StateMachine.add('DETECT_HUMAN',
-                               DetectHuman,
+                               DetectHuman(),
                                transitions={'succeeded':'BOB_SPEAK',
                                            'failure':'NAV_TO_WP'})
         
-        #smach.StateMachine.add('DETECT_PERSON', smach_ros.MonitorState("/people_tracker/pose", Empty, monitor_cb),
-                           #transitions={'invalid':'DETECT_PERSON', 'valid':'APROACH_PERSON', 'preempted':'DETECT_PERSON'})
+        smach.StateMachine.add('DETECT_PERSON', smach_ros.MonitorState("/people_tracker/pose", Empty, monitor_cb),
+                           transitions={'invalid':'DETECT_PERSON', 'valid':'BOB_SPEAK', 'preempted':'DETECT_PERSON'})
 
         #smach.StateMachine.add('APROACH_PERSON',
                            #smach_ros.ServiceState('navigation/navigate_to_waypoint',
@@ -104,4 +103,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
