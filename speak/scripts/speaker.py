@@ -5,6 +5,7 @@ import mary_tts.msg
 import mary_tts.srv
 import strands_gazing.msg
 import os
+import time
 from speak.srv import BobSpeak, BobSpeakResponse
 import thread
 from std_msgs.msg import String
@@ -34,7 +35,7 @@ class Speak:
         speak = mary_tts.msg.maryttsGoal()
         speak.text = line
         self.maryclient.send_goal_and_wait(speak)
-        self.maryclient.cancel_all_goals()
+        #self.maryclient.cancel_all_goals()
 
     def change_voice(self):
         try:
@@ -52,15 +53,29 @@ class Speak:
         self.maryclient = actionlib.SimpleActionClient('speak', mary_tts.msg.maryttsAction)
         self.maryclient.wait_for_server()
         print 'mary_client response'
-
+            
         if req.speech_type == 'greeting':
-            thread.start_new_thread(self.greeting, ())
-            self.card_command()
+            self.card_found = False            
+            self.card_command()            
+            self.greeting()
+            t_end = time.time() + 15
+            while not rospy.is_shutdown() and time.time() < t_end and self.card_found == False:
+                pass
+            if self.card_found:
+                if self.card == 'joke':
+                    self.joke()
+                elif self.card == 'fortune':
+                    self.fortune()
+                    
+                self.farewell()
+                        
+                        
+                    
 
         else:
             getattr(self, req.speech_type)()
 
-        return BobSpeakResponse(1)
+        return BobSpeakResponse(state = 1)
 
     def __init__(self):
         os.chdir(os.path.dirname(os.path.realpath(__file__)))
@@ -102,20 +117,21 @@ class Speak:
 
     def card_command(self):
         print 'start sub'
-        rospy.Subscriber('/socialCardReader/commands', String, self.card_callback)
+        self.sub = rospy.Subscriber('/socialCardReader/commands', String, self.card_callback)
 
     def card_callback(self, msg):
         print 'card found'
         print msg.data
         if msg.data == 'PATROL':
             print 'fortune'
-            self.fortune()
-            self.farewell()
+            self.card = 'fortune'
+            self.card_found = True
         elif msg.data == 'PAUSE_WALK':
             print 'joke'
-            self.joke()
-            self.farewell()
+            self.card = 'joke'
+            self.card_found = True
         print 'fin'
+        self.sub.unregister()
 
 if __name__ == '__main__':
     try:
